@@ -21,26 +21,30 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.spark</groupId>
-    <artifactId>spark-parent_2.11</artifactId>
+    <artifactId>spark-parent_2.10</artifactId>
     <version>1.4.1</version>
-    <relativePath>../../pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.spark</groupId>
-  <artifactId>spark-network-shuffle_2.11</artifactId>
+  <artifactId>spark-unsafe_2.10</artifactId>
   <packaging>jar</packaging>
-  <name>Spark Project Shuffle Streaming Service</name>
+  <name>Spark Project Unsafe</name>
   <url>http://spark.apache.org/</url>
   <properties>
-    <sbt.project.name>network-shuffle</sbt.project.name>
+    <sbt.project.name>unsafe</sbt.project.name>
   </properties>
 
   <dependencies>
+
     <!-- Core dependencies -->
     <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-network-common_${scala.binary.version}</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <!-- Provided dependencies -->
@@ -49,19 +53,8 @@
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
 
     <!-- Test dependencies -->
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-network-common_${scala.binary.version}</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -73,19 +66,37 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>
     <testOutputDirectory>target/scala-${scala.binary.version}/test-classes</testOutputDirectory>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <configuration>
+            <javacArgs combine.children="append">
+              <!-- This option is needed to suppress warnings from sun.misc.Unsafe usage -->
+              <javacArg>-XDignore.symbol.file</javacArg>
+            </javacArgs>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <compilerArgs>
+              <!-- This option is needed to suppress warnings from sun.misc.Unsafe usage -->
+              <arg>-XDignore.symbol.file</arg>
+            </compilerArgs>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>

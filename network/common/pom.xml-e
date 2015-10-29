@@ -21,26 +21,25 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.spark</groupId>
-    <artifactId>spark-parent_2.11</artifactId>
+    <artifactId>spark-parent_2.10</artifactId>
     <version>1.4.1</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.spark</groupId>
-  <artifactId>spark-network-shuffle_2.11</artifactId>
+  <artifactId>spark-network-common_2.10</artifactId>
   <packaging>jar</packaging>
-  <name>Spark Project Shuffle Streaming Service</name>
+  <name>Spark Project Networking</name>
   <url>http://spark.apache.org/</url>
   <properties>
-    <sbt.project.name>network-shuffle</sbt.project.name>
+    <sbt.project.name>network-common</sbt.project.name>
   </properties>
 
   <dependencies>
     <!-- Core dependencies -->
     <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-network-common_${scala.binary.version}</artifactId>
-      <version>${project.version}</version>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
     </dependency>
 
     <!-- Provided dependencies -->
@@ -49,19 +48,18 @@
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
     </dependency>
+    <!--
+      Promote Guava to "compile" so that maven-shade-plugin picks it up (for packaging the Optional
+      class exposed in the Java API). The plugin will then remove this dependency from the published
+      pom, so that Guava does not pollute the client's compilation classpath.
+    -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+      <scope>compile</scope>
     </dependency>
 
     <!-- Test dependencies -->
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-network-common_${scala.binary.version}</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -82,10 +80,31 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>
     <testOutputDirectory>target/scala-${scala.binary.version}/test-classes</testOutputDirectory>
+    <plugins>
+      <!-- Create a test-jar so network-shuffle can depend on our test utilities. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test-jar-on-test-compile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
